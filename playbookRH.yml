@@ -1,26 +1,19 @@
 ---
-- name: Playbook equipo pfsense
-  # A quienes se les va a operar 
-  hosts: web
-  gather_facts: true
+- name: Actualizar paquetes y programar reinicio en una fecha determinada
+  hosts: all
   become: true
+  gather_facts: true
   vars:
-    scheduled_reboot_time: "2024-10-25 14:00" 
-    
+    scheduled_reboot_time: "2024-10-25 14:00"  # Variable para la fecha y hora del reinicio
   tasks:
-    - name: Dame un mensaje
-      ansible.builtin.debug:
-        msg: "Bienvenido al mundo de Ansible"
-
-    # Actualizacion de paquetes     
     - name: Actualizar paquetes en Red Hat/CentOS/Oracle Linux
       dnf:
         name: "*"
         state: latest
       when: ansible_facts['os_family'] == "RedHat"
-      register: dnf_update  
+      register: dnf_update
 
-     name: Programar reinicio en una fecha determinada
+    - name: Programar reinicio en una fecha determinada
       command: "shutdown -r {{ scheduled_reboot_time }}"
       when: dnf_update.changed
       register: shutdown_result  # Registrar resultado del comando
@@ -33,4 +26,5 @@
     - name: Mostrar error si la programación de reinicio falló
       debug:
         msg: "Error al programar el reinicio"
-      when: shutdown_result.rc != 0 
+      when: shutdown_result.rc != 0
+
