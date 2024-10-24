@@ -1,5 +1,5 @@
 ---
-- name: Un playbook muy muy sencillo
+- name: Playbook equipo pfsense
   # A quienes se les va a operar 
   hosts: all
   tasks:
