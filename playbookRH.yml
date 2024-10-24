@@ -1,8 +1,15 @@
 ---
 - name: Playbook equipo pfsense
   # A quienes se les va a operar 
-  hosts: all
+  hosts: web
   tasks:
     - name: Dame un mensaje
       ansible.builtin.debug:
         msg: "Bienvenido al mundo de Ansible"
+
+    # Actualizacion de paquetes     
+    - name: Actualizar paquetes en Red Hat/CentOS/Oracle Linux
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_facts['os_family'] == "RedHat"
