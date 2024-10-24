@@ -3,8 +3,7 @@
   hosts: web
   become: true
   gather_facts: true
-  vars:
-    scheduled_reboot_time: "2024-10-25 14:00"  # Variable para la fecha y hora del reinicio
+  
   tasks:
     - name: Actualizar paquetes en Red Hat/CentOS/Oracle Linux
       ansible.builtin.dnf:
@@ -15,9 +14,6 @@
 
     - name: Programar reinicio en una fecha determinada
       ansible.builtin.reboot:
-        reboot_timeout: 3600  # Establecer un tiempo de espera amplio para la reconexión tras el reinicio
-        pre_reboot_delay: "{{ (scheduled_reboot_time | to_datetime('%Y-%m-%d %H:%M') | to_timestamp) - (ansible_date_time.epoch | int) }}"
-        post_reboot_delay: 60  # Tiempo de espera tras el reinicio
       when: dnf_update.changed
       register: reboot_result  # Registrar el resultado del reinicio
 
