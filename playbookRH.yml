@@ -14,22 +14,26 @@
       register: dnf_update
 
     - name: Programar reinicio en una fecha determinada
-      command: "shutdown -r {{ scheduled_reboot_time }}"
+      ansible.builtin.reboot:
+        reboot_timeout: 3600  # Establecer un tiempo de espera amplio para la reconexión tras el reinicio
+        pre_reboot_delay: "{{ (scheduled_reboot_time | to_datetime('%Y-%m-%d %H:%M') | to_timestamp) - (ansible_date_time.epoch | int) }}"
+        post_reboot_delay: 60  # Tiempo de espera tras el reinicio
       when: dnf_update.changed
-      register: shutdown_result  # Registrar resultado del comando
+      register: reboot_result  # Registrar el resultado del reinicio
 
     - name: Notificar en Slack si la programación de reinicio fue exitosa
       community.general.slack:
         token: "xoxb-your-slack-token-here"
         msg: "Programación de reinicio ejecutada correctamente para {{ inventory_hostname }} a las {{ scheduled_reboot_time }}."
         channel: "#notificaciones"
-      when: shutdown_result.rc == 0
+      when: reboot_result is not failed
 
     - name: Notificar en Slack si la programación de reinicio falló
       community.general.slack:
         token: "xoxb-your-slack-token-here"
         msg: "Error al programar el reinicio en {{ inventory_hostname }}."
         channel: "#notificaciones"
-      when: shutdown_result.rc != 0
+      when: reboot_result is failed
+
 
 
