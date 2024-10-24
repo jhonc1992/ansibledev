@@ -13,3 +13,9 @@
         name: "*"
         state: latest
       when: ansible_facts['os_family'] == "RedHat"
+      register: dnf_update  
+
+    - name: Programar reinicio en una fecha determinada
+      command: shutdown -r 2024-10-25 14:00
+      when: dnf_update.changed  
+      ignore_errors: true  
