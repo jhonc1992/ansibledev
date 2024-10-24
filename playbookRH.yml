@@ -1,6 +1,6 @@
 ---
 - name: Actualizar paquetes y programar reinicio en una fecha determinada
-  hosts: all
+  hosts: web
   become: true
   gather_facts: true
   vars:
