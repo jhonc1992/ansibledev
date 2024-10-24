@@ -2,6 +2,8 @@
 - name: Playbook equipo pfsense
   # A quienes se les va a operar 
   hosts: web
+  gather_facts: true
+  become: true
   tasks:
     - name: Dame un mensaje
       ansible.builtin.debug:
