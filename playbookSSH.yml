@@ -1,7 +1,7 @@
 ---
 
 - name: Controles CIS redhat - SSH
-  hosts: node1:node3
+  hosts: web
   become: true
   vars_files:
     - variables.yml
