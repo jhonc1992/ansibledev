@@ -1,0 +1,8 @@
+---
+
+# Tarea para reiniciar el servicio sshd para aplicar cualquier cambio en su configuración
+- name: Reiniciar sshd
+  become: yes
+  ansible.builtin.systemd:
+    name: sshd
+    state: restarted

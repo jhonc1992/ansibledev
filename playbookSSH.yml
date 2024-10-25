@@ -3,9 +3,25 @@
 - name: Controles CIS redhat - SSH
   hosts: web
   become: true
-  gather_facts: true
-
+  vars_files:
+    - variables.yml
+ 
   tasks:
+      # Prelim requerido para la tarea 5.3.2 | Buscar archivos de claves privadas del host SSH
+    - name: PRELIM | Ensure permissions on SSH private host key files are configured - find
+      find:
+        paths: /etc/ssh
+        patterns: ssh_host_*_key
+      register: ssh_host_keys
+
+      # Prelim requerido para la tarea 5.3.3 | Buscar archivos de claves públicas del host SSH
+    - name: PRELIM | Ensure permissions on SSH public host key files are configured - find
+      find:
+        paths: /etc/ssh
+        patterns: ssh_host_*_key.pub
+      register: ssh_host_keys
+
+
     # Tarea 5.3.1 - Asegúrese de que los permisos en /etc/ssh/sshd_config están configurados
     - name: SCORED | 5.3.1 | PATCH | Ensure permissions on /etc/ssh/sshd_config are configured
       file:
@@ -58,7 +74,6 @@
         - rule_5.3.3
 
     # Tarea 5.3.4 - Asegurar que el acceso a SSH esté limitado
-    ## DESHABILITADO - pendiente definir usuarios y grupos con permisos
     - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited
       block:
         - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited - allowusers
@@ -69,7 +84,7 @@
             line: AllowUsers {{ rhel8_cis_sshd['allowusers'] }}
             validate: /usr/sbin/sshd -T -f %s
           notify:
-            - restart sshd
+            - Reiniciar sshd
           when:
             - "'allowusers' in rhel8_cis_sshd"
 
@@ -204,7 +219,6 @@
         - rule_5.3.9
 
     # Tarea 5.3.10 - Asegurar SSH root login está deshabilitado (Automático)
-    ## DESHABILITADO - muchos servidores utilizan root para login a SSH
     - name: SCORED | 5.3.10 | PATCH | Ensure SSH root login is disabled
       lineinfile:
         state: present
@@ -221,8 +235,4 @@
         - ssh
         - rule_5.3.10
 
-  handlers:
-    - name: restart sshd
-      service:
-        name: sshd
-        state: restarted
+

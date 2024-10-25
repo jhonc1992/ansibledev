@@ -1,0 +1,39 @@
+# Variables correspondientes con los IDs de reglas CIS o números de párrafo definidos en
+# los documentos de referencia del benchmark CIS.
+# NOTA: Estas variables trabajan en coordinación con las variables y etiquetas de grupo de sección.
+# Debes habilitar toda una sección para que las variables a continuación tengan efecto.
+rhel8_cis_rule_5_3_1: true
+rhel8_cis_rule_5_3_2: true
+rhel8_cis_rule_5_3_3: true
+rhel8_cis_rule_5_3_4: true
+rhel8_cis_rule_5_3_5: true
+rhel8_cis_rule_5_3_6: true
+rhel8_cis_rule_5_3_7: true
+rhel8_cis_rule_5_3_8: true
+rhel8_cis_rule_5_3_9: true
+rhel8_cis_rule_5_3_10: true
+
+# Configuraciones de SSH del servidor
+## Controles:
+## - 5.3.4  - Asegurar que el acceso SSH esté limitado
+## - 5.3.13 - Asegurar que el intervalo de tiempo de espera inactivo de SSH esté configurado
+## - 5.3.14 - Asegurar que el LoginGraceTime de SSH esté establecido en un minuto o menos
+rhel8_cis_sshd:
+  clientalivecountmax: 3  # Máximo número de mensajes "keep-alive" no respondidos antes de cerrar la conexión
+  clientaliveinterval: 300 # Intervalo en segundos entre mensajes "keep-alive"
+  logingracetime: 60       # Tiempo en segundos permitido para autenticación exitosa
+  maxstartups: 10:30:60    # Número máximo de conexiones SSH no autenticadas simultáneas permitidas
+
+  # Define usuarios específicos permitidos para el acceso SSH
+  allowusers: root admin tux oracle
+
+  # Define grupos permitidos para el acceso SSH
+  allowgroups: root systems dba
+
+  # Usuarios cuyo acceso SSH está denegado
+  denyusers: "nobody"  # Usuario no permitido para acceso SSH
+
+  # Grupos cuyo acceso SSH está denegado
+  denygroups: ""        # Sin grupos denegados por el momento
+
+
