@@ -3,6 +3,7 @@
 - name: Controles CIS redhat - SSH
   hosts: web
   become: true
+  become_user: ec2-user
   vars_files:
     - variables.yml
  
