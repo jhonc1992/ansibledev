@@ -2,7 +2,7 @@
 
 - name: Controles CIS redhat - SSH
   hosts: web
-  become: true
+  #become: true
   vars_files:
     - variables.yml
  
