@@ -1,0 +1,228 @@
+---
+
+- name: Controles CIS redhat - SSH
+  hosts: web
+  become: true
+  gather_facts: true
+
+  tasks:
+    # Tarea 5.3.1 - Asegúrese de que los permisos en /etc/ssh/sshd_config están configurados
+    - name: SCORED | 5.3.1 | PATCH | Ensure permissions on /etc/ssh/sshd_config are configured
+      file:
+        dest: /etc/ssh/sshd_config
+        state: file
+        owner: root
+        group: root
+        mode: 0600
+      when:
+        - rhel8_cis_rule_5_3_1
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.1
+
+    # Tarea 5.3.2 - Asegurar que los permisos sobre SSH private host key files están configurados
+    - name: SCORED | 5.3.2 | PATCH | Ensure permissions on SSH private host key files are configured - update
+      file:
+        dest: '{{ item }}'
+        owner: root
+        group: root
+        mode: 0600
+      loop: "{{ ssh_host_keys.files | map(attribute='path') | list }}"
+      when:
+        - rhel8_cis_rule_5_3_2
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.2
+
+    # Tarea 5.3.3 - Asegurar que los permisos sobre SSH public host key files están configurados
+    - name: SCORED | 5.3.3 | PATCH | Ensure permissions on SSH public host key files are configured - update
+      file:
+        dest: '{{ item }}'
+        owner: root
+        group: root
+        mode: 0644
+      loop: "{{ ssh_host_keys.files | map(attribute='path') | list }}"
+      when:
+        - rhel8_cis_rule_5_3_3
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.3
+
+    # Tarea 5.3.4 - Asegurar que el acceso a SSH esté limitado
+    ## DESHABILITADO - pendiente definir usuarios y grupos con permisos
+    - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited
+      block:
+        - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited - allowusers
+          lineinfile:
+            state: present
+            dest: /etc/ssh/sshd_config
+            regexp: ^AllowUsers
+            line: AllowUsers {{ rhel8_cis_sshd['allowusers'] }}
+            validate: /usr/sbin/sshd -T -f %s
+          notify:
+            - restart sshd
+          when:
+            - "'allowusers' in rhel8_cis_sshd"
+
+        - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited - allowgroups
+          lineinfile:
+            state: present
+            dest: /etc/ssh/sshd_config
+            regexp: ^AllowGroups
+            line: AllowGroups {{ rhel8_cis_sshd['allowgroups'] }}
+            validate: /usr/sbin/sshd -T -f %s
+          notify:
+            - restart sshd
+          when:
+            - "'allowgroups' in rhel8_cis_sshd"
+
+        - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited - denyusers
+          lineinfile:
+            state: present
+            dest: /etc/ssh/sshd_config
+            regexp: ^DenyUsers
+            line: DenyUsers {{ rhel8_cis_sshd['denyusers'] }}
+            validate: /usr/sbin/sshd -T -f %s
+          notify:
+            - restart sshd
+          when:
+            - "'denyusers' in rhel8_cis_sshd"
+
+        - name: SCORED | 5.3.4 | PATCH | Ensure SSH access is limited - denygroups
+          lineinfile:
+            state: present
+            dest: /etc/ssh/sshd_config
+            regexp: ^DenyGroups
+            line: DenyGroups {{ rhel8_cis_sshd['denygroups'] }}
+            validate: /usr/sbin/sshd -T -f %s
+          notify:
+            - restart sshd
+          when:
+            - "'denygroups' in rhel8_cis_sshd"
+      when:
+        - rhel8_cis_rule_5_3_4
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.4
+
+    # Tarea 5.3.5 - Asegurar SSH LogLevel sea el apropiado (Automático)
+    - name: SCORED | 5.3.5 | PATCH | Ensure SSH LogLevel is appropriate
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^LogLevel
+        line: LogLevel INFO
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_5
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.5
+
+    # Tarea 5.3.6 - Asegurar SSH X11 forwarding está deshabilitado (Automático)
+    ### DESHABILITADO - se utiliza para login a perfil web de internet
+    - name: SCORED | 5.3.6 | PATCH | Ensure SSH X11 forwarding is disabled
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^X11Forwarding
+        line: X11Forwarding no
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_6
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.6
+
+    # Tarea 5.3.7 - Asegurar SSH MaxAuthTries esté establecido en 4 o menos (Automático)
+    - name: SCORED | 5.3.7 | PATCH | Ensure SSH MaxAuthTries is set to 4 or less
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^(#)?MaxAuthTries \d
+        line: MaxAuthTries 4
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_7
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh 
+        - rule_5.3.7
+
+    # Tarea 5.3.8 - Asegurar SSH IgnoreRhosts está habilitado (Automático)
+    - name: SCORED | 5.3.8 | PATCH | Ensure SSH IgnoreRhosts is enabled
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^IgnoreRhosts
+        line: IgnoreRhosts yes
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_8
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.8
+
+    # Tarea 5.3.9 - Asegurar SSH HostbasedAuthentication está deshabilitado (Automático)
+    - name: SCORED | 5.3.9 | PATCH | Ensure SSH HostbasedAuthentication is disabled
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^HostbasedAuthentication
+        line: HostbasedAuthentication no
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_9
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.9
+
+    # Tarea 5.3.10 - Asegurar SSH root login está deshabilitado (Automático)
+    ## DESHABILITADO - muchos servidores utilizan root para login a SSH
+    - name: SCORED | 5.3.10 | PATCH | Ensure SSH root login is disabled
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: ^PermitRootLogin
+        line: PermitRootLogin no
+        validate: /usr/sbin/sshd -T -f %s
+      when:
+        - rhel8_cis_rule_5_3_10
+      tags:
+        - level1
+        - level2
+        - patch
+        - ssh
+        - rule_5.3.10
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted
