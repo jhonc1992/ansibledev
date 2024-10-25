@@ -150,7 +150,7 @@
         - rule_5.3.5
 
     # Tarea 5.3.6 - Asegurar SSH X11 forwarding está deshabilitado (Automático)
-    ### DESHABILITADO - se utiliza para login a perfil web de internet
+    ### 
     - name: SCORED | 5.3.6 | PATCH | Ensure SSH X11 forwarding is disabled
       lineinfile:
         state: present
